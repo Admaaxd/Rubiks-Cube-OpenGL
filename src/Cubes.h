@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include <iostream>
 
 class Cubes
 {
@@ -12,7 +13,7 @@ public:
 	Cubes();
 	~Cubes();
 
-	void initialize();
+	void initialize3x3(const std::vector<glm::vec3>& faceColors);
 	void Draw();
 	void updateOpenGLBuffers();
 

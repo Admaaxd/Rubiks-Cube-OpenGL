@@ -12,7 +12,6 @@
 #include <glm/gtx/string_cast.hpp>
 #include <windows.h>
 #include <psapi.h>
-#include <iostream>
 
 #include "shader.h"
 #include "Camera.h"

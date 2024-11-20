@@ -31,7 +31,14 @@ int main()
 	shader mainShader("shaders/main.vs", "shaders/main.fs");
 
 	Cubes cube;
-	cube.initialize();
+	cube.initialize3x3({
+		{0.0f, 0.0f, 1.0f}, // Back face: blue
+		{0.0f, 1.0f, 0.0f}, // Front face: green
+		{1.0f, 0.5f, 0.0f}, // Left face: orange
+		{1.0f, 0.0f, 0.0f}, // Right face: red
+		{1.0f, 1.0f, 0.0f}, // Bottom face: yellow
+		{1.0f, 1.0f, 1.0f}  // Top face: white
+	});
 
 	main::setupRenderingState();
 
@@ -66,14 +73,15 @@ void main::processRendering(GLFWwindow* window, shader& mainShader, Cubes& cube)
 	mainShader.setMat4("view", view);
 	mainShader.setMat4("projection", projection);
 
-	for (int x = -1; x <= 1; ++x)
-	{
-		for (int y = -1; y <= 1; ++y)
-		{
-			for (int z = -1; z <= 1; ++z)
-			{
+	for (int8_t x = -1; x <= 1; ++x) {
+		for (int8_t y = -1; y <= 1; ++y) {
+			for (int8_t z = -1; z <= 1; ++z) {
+
 				glm::mat4 model = glm::mat4(1.0f);
+				GLfloat time = static_cast<GLfloat>(glfwGetTime());
+				model = glm::rotate(model, time, glm::vec3(0.0f, 1.0f, 0.0f));
 				model = glm::translate(model, glm::vec3(x, y, z));
+				model = glm::scale(model, glm::vec3(0.95f));
 				mainShader.setMat4("model", model);
 
 				cube.Draw();
@@ -161,10 +169,10 @@ void main::mouse_callback(GLFWwindow* window, GLdouble xposIn, GLdouble yposIn)
 	camera.updateCameraOrientation(camera.getYaw() + xoffset, camera.getPitch() + yoffset);
 }
 
-void main::setupRenderingState() {
+void main::setupRenderingState() 
+{
 	glEnable(GL_DEPTH_TEST);
 }
-
 
 void main::updateFPS()
 {
