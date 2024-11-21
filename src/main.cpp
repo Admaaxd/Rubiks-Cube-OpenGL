@@ -13,6 +13,8 @@ GLfloat lastFrame = 0.0f;
 
 Camera camera;
 
+bool isGUIEnabled = false;
+
 GLdouble lastTime = glfwGetTime();
 uint8_t nbFrames = 0;
 GLfloat fps = 0;
@@ -40,6 +42,8 @@ int main()
 		{1.0f, 1.0f, 1.0f}  // Top face: white
 	});
 
+	main::initializeImGui(window);
+
 	main::setupRenderingState();
 
 	while (!glfwWindowShouldClose(window))
@@ -50,11 +54,14 @@ int main()
 
 		main::processRendering(window, mainShader, cube);
 
+		main::renderImGui(window);
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
 	main::cleanup(mainShader);
+	main::cleanupImGui();
 
 	glfwTerminate();
 	return 0;
@@ -129,23 +136,45 @@ void main::framebuffer_size_callback(GLFWwindow* window, GLint width, GLint heig
 
 void main::processInput(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(window, true);
+	static bool lastEscState = false;
+	bool currentEscState = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+
+	if (currentEscState && !lastEscState) {
+		isGUIEnabled = !isGUIEnabled;
+
+		if (isGUIEnabled) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+		else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		if (!isGUIEnabled) {
+			GLdouble xpos, ypos;
+			glfwGetCursorPos(window, &xpos, &ypos);
+			lastX = static_cast<GLfloat>(xpos);
+			lastY = static_cast<GLfloat>(ypos);
+		}
 	}
+	lastEscState = currentEscState;
 
-	camera.setMovementState(Direction::FORWARD, glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
-	camera.setMovementState(Direction::BACKWARD, glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
-	camera.setMovementState(Direction::LEFT, glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
-	camera.setMovementState(Direction::RIGHT, glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
-	camera.setMovementState(Direction::UP, glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
-	camera.setMovementState(Direction::DOWN, glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
+	if (!isGUIEnabled) {
+		camera.setMovementState(Direction::FORWARD, glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
+		camera.setMovementState(Direction::BACKWARD, glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
+		camera.setMovementState(Direction::LEFT, glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
+		camera.setMovementState(Direction::RIGHT, glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
+		camera.setMovementState(Direction::UP, glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+		camera.setMovementState(Direction::DOWN, glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
 
-	camera.update(deltaTime);
+		camera.update(deltaTime);
+	}
 }
 
 void main::mouse_callback(GLFWwindow* window, GLdouble xposIn, GLdouble yposIn)
 {
+	if (isGUIEnabled) {
+		return;
+	}
+
 	GLfloat xpos = static_cast<float>(xposIn);
 	GLfloat ypos = static_cast<float>(yposIn);
 
@@ -172,6 +201,43 @@ void main::mouse_callback(GLFWwindow* window, GLdouble xposIn, GLdouble yposIn)
 void main::setupRenderingState() 
 {
 	glEnable(GL_DEPTH_TEST);
+}
+
+void main::initializeImGui(GLFWwindow* window)
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+	ImGui::StyleColorsDark();
+}
+
+void main::renderImGui(GLFWwindow* window)
+{
+	if (!isGUIEnabled) return;
+
+	glDisable(GL_DEPTH_TEST);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::Begin("Menu");
+
+	if (ImGui::Button("Exit Game")) glfwSetWindowShouldClose(window, true);
+
+	ImGui::End();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	glEnable(GL_DEPTH_TEST);
+}
+
+void main::cleanupImGui()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
 
 void main::updateFPS()

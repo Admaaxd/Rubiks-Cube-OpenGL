@@ -30,6 +30,10 @@ public:
 
 	static void setupRenderingState();
 
+	static void initializeImGui(GLFWwindow* window);
+	static void renderImGui(GLFWwindow* window);
+	static void cleanupImGui();
+
 	static void updateFPS();
 
 	static void cleanup(shader& mainShader);
