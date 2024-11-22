@@ -8,15 +8,15 @@
 
 - [ ] **Custom Background**  
 
-- [ ] **Additional Cube Variants**   
-  - [ ] 2x2 Rubik's Cube.
+- [x] **Additional Cube Variants**   
+  - [x] 2x2 Rubik's Cube.
   - [x] 3x3 Rubik's Cube. 
-  - [ ] 4x4 Rubik's Cube.  
-  - [ ] 5x5 Rubik's Cube.  
+  - [x] 4x4 Rubik's Cube.  
+  - [x] 5x5 Rubik's Cube.  
 
-- [ ] **Graphical User Interface (GUI)**    
+- [x] **Graphical User Interface (GUI)**    
   - [ ] Cube size selection.
-  - [ ] Cube variant selection.
+  - [x] Cube variant selection.
   - [ ] Background customization.  
   - [ ] Adjustable light intensity.
   - [ ] Customizable light colors. 

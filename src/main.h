@@ -22,6 +22,7 @@ public:
 	static void processRendering(GLFWwindow* window, shader& mainShader, Cubes& cube);
 
 	static void initializeGLFW(GLFWwindow*& window);
+	static void toggleFullscreen(GLFWwindow* window);
 	static void initializeGLAD();
 	static void framebuffer_size_callback(GLFWwindow* window, GLint width, GLint height);
 	static void processInput(GLFWwindow* window);

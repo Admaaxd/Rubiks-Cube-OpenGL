@@ -4,6 +4,11 @@
 constexpr GLuint SCR_WIDTH = 1280;
 constexpr GLuint SCR_HEIGHT = 720;
 
+GLFWmonitor* primaryMonitor;
+GLint windowedPosX, windowedPosY;
+GLint windowedWidth = SCR_WIDTH, windowedHeight = SCR_HEIGHT;
+bool isFullscreen = false;
+
 GLfloat lastX = SCR_WIDTH / 2.0f;
 GLfloat lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -18,6 +23,10 @@ bool isGUIEnabled = false;
 GLdouble lastTime = glfwGetTime();
 uint8_t nbFrames = 0;
 GLfloat fps = 0;
+
+int8_t cubeGridSize = 3;
+const char* cubeSizes[] = { "2x2", "3x3", "4x4", "5x5" };
+GLint selectedSizeIndex = 1;
 #pragma endregion
 
 int main()
@@ -80,10 +89,9 @@ void main::processRendering(GLFWwindow* window, shader& mainShader, Cubes& cube)
 	mainShader.setMat4("view", view);
 	mainShader.setMat4("projection", projection);
 
-	for (int8_t x = -1; x <= 1; ++x) {
-		for (int8_t y = -1; y <= 1; ++y) {
-			for (int8_t z = -1; z <= 1; ++z) {
-
+	for (int8_t x = -(cubeGridSize / 2); x <= cubeGridSize / 2 - (cubeGridSize % 2 == 0 ? 1 : 0); ++x) {
+		for (int8_t y = -(cubeGridSize / 2); y <= cubeGridSize / 2 - (cubeGridSize % 2 == 0 ? 1 : 0); ++y) {
+			for (int8_t z = -(cubeGridSize / 2); z <= cubeGridSize / 2 - (cubeGridSize % 2 == 0 ? 1 : 0); ++z) {
 				glm::mat4 model = glm::mat4(1.0f);
 				GLfloat time = static_cast<GLfloat>(glfwGetTime());
 				model = glm::rotate(model, time, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -95,8 +103,6 @@ void main::processRendering(GLFWwindow* window, shader& mainShader, Cubes& cube)
 			}
 		}
 	}
-
-	cube.Draw();
 }
 
 void main::initializeGLFW(GLFWwindow*& window)
@@ -106,7 +112,10 @@ void main::initializeGLFW(GLFWwindow*& window)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Rubik's Cube", nullptr, nullptr);
+	primaryMonitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+
+	window = glfwCreateWindow(windowedWidth, windowedHeight, "Rubik's Cube", nullptr, nullptr);
 
 	if (!window)
 	{
@@ -114,10 +123,31 @@ void main::initializeGLFW(GLFWwindow*& window)
 		glfwTerminate();
 		exit(-1);
 	}
+
 	glfwMakeContextCurrent(window);
+
 	glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, GLint width, GLint height) {
 		glViewport(0, 0, width, height);
 	});
+}
+
+void main::toggleFullscreen(GLFWwindow* window)
+{
+	if (isFullscreen)
+	{
+		glfwSetWindowMonitor(window, nullptr, windowedPosX, windowedPosY, windowedWidth, windowedHeight, 0);
+	}
+	else
+	{
+		const GLFWvidmode* videoMode = glfwGetVideoMode(primaryMonitor);
+
+		glfwGetWindowPos(window, &windowedPosX, &windowedPosY);
+		glfwGetWindowSize(window, &windowedWidth, &windowedHeight);
+
+		glfwSetWindowMonitor(window, primaryMonitor, 0, 0, videoMode->width, videoMode->height, videoMode->refreshRate);
+	}
+
+	isFullscreen = !isFullscreen;
 }
 
 void main::initializeGLAD()
@@ -222,6 +252,19 @@ void main::renderImGui(GLFWwindow* window)
 	ImGui::NewFrame();
 
 	ImGui::Begin("Menu");
+
+	if (ImGui::Combo("Cube Size", &selectedSizeIndex, cubeSizes, IM_ARRAYSIZE(cubeSizes))) 
+	{
+		cubeGridSize = selectedSizeIndex + 2;
+	}
+
+	ImGui::Separator();
+
+	if (ImGui::Button("Toggle Fullscreen")) {
+		toggleFullscreen(window);
+	}
+
+	ImGui::Separator();
 
 	if (ImGui::Button("Exit Game")) glfwSetWindowShouldClose(window, true);
 
