@@ -4,9 +4,10 @@
 #define SHADER_H
 
 #include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+#include <filesystem>
 
 #include <string>
 #include <fstream>
@@ -48,6 +49,7 @@ public:
 
     void setMat4(const std::string& name, const glm::mat4& mat) const;
     
+    std::string getExecutableDir();
 };
 
 #endif

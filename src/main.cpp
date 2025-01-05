@@ -39,7 +39,7 @@ int main()
 	glfwSetCursorPosCallback(window, main::mouse_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	shader mainShader("shaders/main.vs", "shaders/main.fs");
+	shader mainShader("main.vs", "main.fs");
 
 	Cubes cube;
 	cube.initialize3x3({
