@@ -23,3 +23,23 @@
 
 - [ ] **Custom Lighting**    
   - [ ] Dynamic shadows.
+     
+
+## How to build it using CMake
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/Admaaxd/Rubiks-Cube-OpenGL.git
+   cd Rubiks-Cube-OpenGL
+
+2. **Build the project**
+   ```bash
+   mkdir build
+   cd build
+   cmake -DCMAKE_BUILD_TYPE=Debug ..
+   cmake --build .
+   
+3. **Run the program**
+   ```bash
+   cd Debug
+   Rubiks_Cube.exe
